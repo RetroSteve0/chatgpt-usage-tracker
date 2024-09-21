@@ -1,3 +1,4 @@
+<!-- popup.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,31 +10,116 @@
       width: 300px;
       padding: 20px;
       box-sizing: border-box;
+      background-color: #f9f9f9;
     }
-    #usage-summary {
-      margin-top: 10px;
-      font-size: 14px;
+    h2 {
+      text-align: center;
       color: #333;
-      white-space: pre-wrap; /* Preserve line breaks */
+      margin-bottom: 20px;
     }
-    #reset-button {
-      margin-top: 20px;
-      padding: 8px 12px;
+    /* Manual Adjustment Sections */
+    .model-section {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .model-section h3 {
+      margin-top: 0;
+      color: #28a745; /* Green color for model titles */
+      font-size: 16px;
+    }
+    label {
+      display: block;
+      margin-top: 8px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    input[type="number"],
+    input[type="datetime-local"] {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    /* Buttons */
+    #save-button, #reset-button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
       background-color: #007bff;
       color: #fff;
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
     }
-    #reset-button:hover {
+    #save-button:hover, #reset-button:hover {
       background-color: #0056b3;
+    }
+    /* Status Message */
+    #status-message {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #28a745; /* Green color for success messages */
     }
   </style>
 </head>
 <body>
   <h2>ChatGPT Usage</h2>
-  <div id="usage-summary">Loading...</div>
-  <button id="reset-button">Reset Usage</button>
+  
+  <!-- Manual Adjustment Sections for Each Model -->
+  <div class="model-section" id="model-o1-mini">
+    <h3>ChatGPT o1-mini</h3>
+    <label for="uses-o1-mini">Remaining Uses:</label>
+    <input type="number" id="uses-o1-mini" name="uses-o1-mini" min="0" required>
+    
+    <label for="reset-o1-mini">Reset Time:</label>
+    <input type="datetime-local" id="reset-o1-mini" name="reset-o1-mini" required>
+  </div>
+  
+  <div class="model-section" id="model-4">
+    <h3>ChatGPT 4</h3>
+    <label for="uses-4">Remaining Uses:</label>
+    <input type="number" id="uses-4" name="uses-4" min="0" required>
+    
+    <label for="reset-4">Reset Time:</label>
+    <input type="datetime-local" id="reset-4" name="reset-4" required>
+  </div>
+  
+  <div class="model-section" id="model-4o">
+    <h3>ChatGPT 4o</h3>
+    <label for="uses-4o">Remaining Uses:</label>
+    <input type="number" id="uses-4o" name="uses-4o" min="0" required>
+    
+    <label for="reset-4o">Reset Time:</label>
+    <input type="datetime-local" id="reset-4o" name="reset-4o" required>
+  </div>
+  
+  <div class="model-section" id="model-o1-preview">
+    <h3>ChatGPT o1-preview</h3>
+    <label for="uses-o1-preview">Remaining Uses:</label>
+    <input type="number" id="uses-o1-preview" name="uses-o1-preview" min="0" required>
+    
+    <label for="reset-o1-preview">Reset Time:</label>
+    <input type="datetime-local" id="reset-o1-preview" name="reset-o1-preview" required>
+  </div>
+  
+  <!-- Save Changes Button -->
+  <button id="save-button">Save Changes</button>
+  
+  <!-- Reset Usage Button -->
+  <button id="reset-button">Reset All Usage</button>
+  
+  <!-- Status Message -->
+  <div id="status-message"></div>
 
   <script src="popup.js"></script>
 </body>
