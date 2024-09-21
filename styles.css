@@ -1,0 +1,173 @@
+/* styles.css */
+
+/* Existing Styles ... */
+
+/* Usage Indicator Container */
+#chatgpt-usage-indicator {
+  position: fixed;
+  bottom: 20px; /* Positioned at the bottom-right */
+  right: 20px;
+  width: 250px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px 8px 0 0; /* Rounded top corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  color: #333;
+  z-index: 10000;
+  overflow: hidden;
+  max-height: 50px; /* Collapsed height */
+  transition: max-height 0.5s ease, border-radius 0.5s ease; /* Smooth transition */
+}
+
+/* Expanded State */
+#chatgpt-usage-indicator.expanded {
+  max-height: 400px; /* Expanded height */
+  border-radius: 8px; /* Rounded corners on all sides when expanded */
+}
+
+/* Header Section */
+#chatgpt-usage-indicator .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 10px 15px;
+  cursor: pointer; /* Changed from default to pointer */
+}
+
+/* Toggle Button */
+#chatgpt-usage-indicator .toggle-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.3s ease;
+}
+
+/* Rotate the toggle button when expanded */
+#chatgpt-usage-indicator.expanded .toggle-button {
+  transform: rotate(180deg);
+}
+
+/* Content Section */
+#chatgpt-usage-indicator .content {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 15px;
+  background-color: #ffffff;
+  transition: max-height 0.5s ease, padding 0.5s ease;
+}
+
+/* Expanded Content */
+#chatgpt-usage-indicator.expanded .content {
+  max-height: 400px; /* Adjust based on expected content height */
+  padding: 10px 15px;
+}
+
+/* Usage List Styles */
+#chatgpt-usage-indicator ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#chatgpt-usage-indicator li {
+  margin-bottom: 10px;
+}
+
+#chatgpt-usage-indicator li:last-child {
+  margin-bottom: 0;
+}
+
+#chatgpt-usage-indicator li strong {
+  display: block;
+  font-size: 15px;
+  color: #222;
+}
+
+#chatgpt-usage-indicator li em {
+  display: block;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Notification Styles (Unchanged) */
+#chatgpt-usage-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #ffdddd;
+  color: #a33;
+  padding: 10px 20px;
+  border: 1px solid #a33;
+  border-radius: 5px;
+  z-index: 10000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  display: none; /* Hidden by default */
+}
+
+/* Splash Screen Styles (Unchanged) */
+#chatgpt-usage-splash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent dark background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002; /* Above usage indicator */
+}
+
+#chatgpt-usage-splash .splash-content {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 80%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#chatgpt-usage-splash .splash-content h2 {
+  margin-top: 0;
+  color: #333333;
+  font-size: 24px;
+}
+
+#chatgpt-usage-splash .splash-content p {
+  color: #555555;
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+#chatgpt-usage-splash .splash-content .close-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+#chatgpt-usage-splash .splash-content .close-button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive Adjustments (Unchanged) */
+@media (max-width: 600px) {
+  #chatgpt-usage-indicator {
+    width: 90%;
+    right: 5%;
+    bottom: 10px;
+  }
+}
