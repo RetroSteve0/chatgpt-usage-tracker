@@ -1,7 +1,5 @@
 /* styles.css */
 
-/* Existing Styles ... */
-
 /* Usage Indicator Container */
 #chatgpt-usage-indicator {
   position: fixed;
@@ -17,7 +15,7 @@
   color: #333;
   z-index: 10000;
   overflow: hidden;
-  max-height: 50px; /* Collapsed height */
+  max-height: 100px; /* Adjusted to accommodate "Last Used" */
   transition: max-height 0.5s ease, border-radius 0.5s ease; /* Smooth transition */
 }
 
@@ -30,11 +28,34 @@
 /* Header Section */
 #chatgpt-usage-indicator .header {
   display: flex;
+  flex-direction: column; /* Stack header-top and header-bottom vertically */
+}
+
+/* Header-Top: Title and Toggle Button */
+#chatgpt-usage-indicator .header-top {
+  display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #f5f5f5;
   padding: 10px 15px;
   cursor: pointer; /* Changed from default to pointer */
+}
+
+/* Header-Bottom: Collapsed Usage Text */
+#chatgpt-usage-indicator .header-bottom {
+  padding: 0 15px 10px 15px; /* Padding for spacing */
+  background-color: #ffffff;
+}
+
+#chatgpt-usage-indicator .header-bottom #collapsed-usage-text {
+  font-size: 14px;
+  color: #28a745; /* Green color to highlight */
+  font-weight: bold;
+}
+
+/* Hide Collapsed Usage Text When Expanded */
+#chatgpt-usage-indicator.expanded .header-bottom #collapsed-usage-text {
+  display: none;
 }
 
 /* Toggle Button */
@@ -92,6 +113,15 @@
   display: block;
   font-size: 13px;
   color: #666;
+}
+
+/* Highlight the last used model */
+#chatgpt-usage-indicator .content ul li.last-used {
+  background-color: #d4edda; /* Light green background */
+  border-left: 5px solid #28a745; /* Green border on the left */
+  padding-left: 10px; /* Indent text to accommodate border */
+  border-radius: 4px;
+  transition: background-color 0.3s ease, border-left-color 0.3s ease;
 }
 
 /* Notification Styles (Unchanged) */
@@ -163,7 +193,7 @@
   background-color: #0056b3;
 }
 
-/* Responsive Adjustments (Unchanged) */
+/* Responsive Adjustments */
 @media (max-width: 600px) {
   #chatgpt-usage-indicator {
     width: 90%;

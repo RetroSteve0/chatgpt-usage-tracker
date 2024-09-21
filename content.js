@@ -15,9 +15,9 @@
 
 // Define usage limits for each ChatGPT model
 const usageLimits = {
-  "4o": { limit: 80, period: 3 * 60 * 60 * 1000 },          // 80 messages per 3 hours
+  "4o": { limit: 80, period: 3 * 60 * 60 * 1000 },            // 80 messages per 3 hours
   "o1-preview": { limit: 50, period: 7 * 24 * 60 * 60 * 1000 }, // 50 messages per week
-  "o1-mini": { limit: 50, period: 24 * 60 * 60 * 1000 },   // 50 messages per day
+  "o1-mini": { limit: 50, period: 24 * 60 * 60 * 1000 },     // 50 messages per day
   "4": { limit: 40, period: 3 * 60 * 60 * 1000 }            // 40 messages per 3 hours
   // "4o-mini": Unlimited (No tracking)
 };
@@ -45,13 +45,17 @@ const now = () => new Date().getTime();
  * @returns {string|null} The model key if detected, otherwise null.
  */
 function detectModel() {
+  console.log('detectModel: Starting model detection.');
   const spans = document.querySelectorAll('span.text-token-text-secondary');
   for (let span of spans) {
     const text = span.textContent.trim();
     if (["4o mini", "4", "4o", "o1-preview", "o1-mini"].includes(text)) {
-      return text.replace(' mini', '-mini'); // Convert to key format (e.g., "4o mini" -> "4o-mini")
+      const modelKey = text.replace(' mini', '-mini'); // Convert to key format (e.g., "4o mini" -> "4o-mini")
+      console.log(`detectModel: Detected model - ${modelKey}`);
+      return modelKey;
     }
   }
+  console.log('detectModel: No model detected.');
   return null;
 }
 
@@ -64,7 +68,11 @@ function detectModel() {
  */
 chrome.storage.local.get(['usageData'], (result) => {
   if (!result.usageData) {
-    chrome.storage.local.set({ usageData: {} });
+    chrome.storage.local.set({ usageData: {} }, () => {
+      console.log('initializeStorage: Initialized usageData in storage.');
+    });
+  } else {
+    console.log('initializeStorage: usageData already exists.');
   }
 });
 
@@ -73,12 +81,15 @@ chrome.storage.local.get(['usageData'], (result) => {
 // -----------------------------
 
 /**
- * Increments the usage count for a specific model.
+ * Increments the usage count for a specific model and tracks the last used model.
  * @param {string} model - The key of the ChatGPT model.
  */
 function incrementUsage(model) {
+  console.log(`incrementUsage: Attempting to increment usage for model - ${model}`);
+  
   if (model === "4o-mini") {
     // Unlimited usage; no tracking needed.
+    console.log('incrementUsage: Model is 4o-mini. No tracking needed.');
     return;
   }
 
@@ -109,8 +120,12 @@ function incrementUsage(model) {
       }
     }
 
-    // Save updated usage data
-    chrome.storage.local.set({ usageData }, () => {
+    // Save updated usage data and update the last used model
+    chrome.storage.local.set({ 
+      usageData,
+      lastUsedModel: model  // Track the last used model
+    }, () => {
+      console.log(`incrementUsage: Updated usageData and set lastUsedModel to ${model}.`);
       checkLimit(model, usageData[model].count);
       updateIndicator();
     });
@@ -125,9 +140,12 @@ function incrementUsage(model) {
 function checkLimit(model, count) {
   const limit = usageLimits[model].limit;
   if (count > limit) {
+    console.log(`checkLimit: Usage limit exceeded for ${model}. Count: ${count}, Limit: ${limit}`);
     notifyUser(`Usage limit reached for ${displayNames[model] || model}. Limit: ${limit} messages.`);
     // Optionally, disable input or take other actions here
     disableInput();
+  } else {
+    console.log(`checkLimit: Usage within limit for ${model}. Count: ${count}, Limit: ${limit}`);
   }
 }
 
@@ -139,7 +157,9 @@ function disableInput() {
   if (inputField) {
     inputField.setAttribute('contenteditable', 'false');
     inputField.style.backgroundColor = '#f0f0f0'; // Visual indication
-    console.log('Input field disabled due to usage limit.');
+    console.log('disableInput: Input field disabled due to usage limit.');
+  } else {
+    console.log('disableInput: Input field not found.');
   }
 }
 
@@ -151,7 +171,9 @@ function enableInput() {
   if (inputField) {
     inputField.setAttribute('contenteditable', 'true');
     inputField.style.backgroundColor = ''; // Reset to original
-    console.log('Input field enabled.');
+    console.log('enableInput: Input field enabled.');
+  } else {
+    console.log('enableInput: Input field not found.');
   }
 }
 
@@ -160,6 +182,7 @@ function enableInput() {
  * @param {string} message - The message to display.
  */
 function notifyUser(message) {
+  console.log(`notifyUser: ${message}`);
   // Create a notification element if it doesn't exist
   let notification = document.getElementById('chatgpt-usage-notification');
   if (!notification) {
@@ -201,17 +224,18 @@ function resetUsageIfNeeded() {
         usageData[key].count = 0;
         usageData[key].resetTime = currentTime + usageLimits[key].period;
         hasReset = true;
-        console.log(`Usage for ${displayNames[key] || key} has been reset.`);
+        console.log(`resetUsageIfNeeded: Usage for ${displayNames[key] || key} has been reset.`);
       }
     }
 
     if (hasReset) {
       chrome.storage.local.set({ usageData }, () => {
-        // Update the usage indicator to reflect resets
+        console.log('resetUsageIfNeeded: Updated usageData after reset.');
         updateIndicator();
-        // Re-enable the input field if it was disabled
         enableInput();
       });
+    } else {
+      console.log('resetUsageIfNeeded: No usage data needed to reset.');
     }
   });
 }
@@ -245,7 +269,10 @@ function showSplashScreen() {
   const closeButton = splash.querySelector('.close-button');
   closeButton.addEventListener('click', () => {
     splash.remove();
+    console.log('showSplashScreen: Splash screen closed by user.');
   });
+
+  console.log('showSplashScreen: Splash screen displayed.');
 }
 
 /**
@@ -255,7 +282,11 @@ function checkAndShowSplashScreen() {
   chrome.storage.local.get(['hasShownSplash'], (result) => {
     if (!result.hasShownSplash) {
       showSplashScreen();
-      chrome.storage.local.set({ hasShownSplash: true });
+      chrome.storage.local.set({ hasShownSplash: true }, () => {
+        console.log('checkAndShowSplashScreen: Splash screen marked as shown.');
+      });
+    } else {
+      console.log('checkAndShowSplashScreen: Splash screen already shown.');
     }
   });
 }
@@ -266,6 +297,8 @@ function checkAndShowSplashScreen() {
 
 /**
  * Updates the usage indicator UI element with current usage data.
+ * Displays "ChatGPT o1-mini: 25 uses remaining" in green when collapsed.
+ * Removes this text when expanded.
  */
 function updateIndicator() {
   let indicator = document.getElementById('chatgpt-usage-indicator');
@@ -275,8 +308,13 @@ function updateIndicator() {
     indicator.id = 'chatgpt-usage-indicator';
     indicator.innerHTML = `
       <div class="header">
-        <h3>ChatGPT Usage</h3>
-        <button class="toggle-button">▼</button>
+        <div class="header-top">
+          <h3>ChatGPT Usage</h3>
+          <button class="toggle-button">▼</button>
+        </div>
+        <div class="header-bottom">
+          <span id="collapsed-usage-text">ChatGPT o1-mini: 25 uses remaining</span>
+        </div>
       </div>
       <div class="content">
         <ul></ul>
@@ -286,8 +324,15 @@ function updateIndicator() {
 
     // Add event listener for the header to collapse/expand the indicator
     const header = indicator.querySelector('.header');
-    header.addEventListener('click', () => {
+    header.addEventListener('click', (event) => {
+      // Prevent toggle when clicking on the toggle button to avoid event bubbling
+      if (event.target.classList.contains('toggle-button') || event.target.closest('.toggle-button')) {
+        return;
+      }
       indicator.classList.toggle('expanded'); // Toggle the 'expanded' class
+      const toggleButton = indicator.querySelector('.toggle-button');
+      toggleButton.textContent = indicator.classList.contains('expanded') ? '▲' : '▼';
+      console.log('updateIndicator: Toggled usage indicator.');
     });
 
     // Retrieve and apply the collapsed state from storage
@@ -300,10 +345,31 @@ function updateIndicator() {
     });
   }
 
-  chrome.storage.local.get(['usageData'], (result) => {
+  // Retrieve usageData and lastUsedModel from storage
+  chrome.storage.local.get(['usageData', 'lastUsedModel'], (result) => {
     const usageData = result.usageData || {};
+    const lastUsedModel = result.lastUsedModel || null;
     const list = indicator.querySelector('ul');
     list.innerHTML = ''; // Clear existing list items
+
+    // Calculate remaining uses for the last used model
+    let remainingUsesText = "N/A";
+    if (lastUsedModel && usageLimits[lastUsedModel]) {
+      const usedCount = usageData[lastUsedModel]?.count || 0;
+      const remaining = usageLimits[lastUsedModel].limit - usedCount;
+      remainingUsesText = `${remaining} uses remaining`;
+    }
+
+    // Update the collapsed usage text
+    const collapsedUsageText = indicator.querySelector('#collapsed-usage-text');
+    if (collapsedUsageText) {
+      if (lastUsedModel) {
+        const displayName = displayNames[lastUsedModel] || lastUsedModel;
+        collapsedUsageText.textContent = `${displayName}: ${remainingUsesText}`;
+      } else {
+        collapsedUsageText.textContent = `ChatGPT Usage: N/A`;
+      }
+    }
 
     // Iterate through all defined models to display their usage stats
     for (let key in usageLimits) {
@@ -330,6 +396,13 @@ function updateIndicator() {
 
       // Create a list item for the model's usage stats
       const listItem = document.createElement('li');
+
+      // Check if this model is the last used model
+      if (key === lastUsedModel) {
+        listItem.classList.add('last-used'); // Add a special class for highlighting
+        console.log(`updateIndicator: Highlighting last used model - ${displayName}`);
+      }
+
       listItem.innerHTML = `
         <strong>${displayName}:</strong> ${data.count}/${limit} messages (${remaining} remaining)
         <br/>
@@ -397,9 +470,12 @@ const observer = new MutationObserver((mutations) => {
         if (node.nodeType === Node.ELEMENT_NODE) {
           // Detect sent messages; adjust selector based on actual ChatGPT DOM structure
           if (node.matches('article[data-testid^="conversation-turn-"]')) {
+            console.log('observer: Detected new message.');
             const model = detectModel();
             if (model) {
               incrementUsage(model);
+            } else {
+              console.log('observer: No model detected for the new message.');
             }
           }
         }
@@ -417,9 +493,10 @@ const startObserving = () => {
   const messageContainer = document.querySelector("body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden");
   if (messageContainer) {
     observer.observe(messageContainer, { childList: true, subtree: true });
-    console.log('Started observing message container.');
+    console.log('startObserving: Started observing message container.');
   } else {
     // Retry if the container is not found yet (e.g., due to dynamic loading)
+    console.log('startObserving: Message container not found. Retrying in 1 second.');
     setTimeout(startObserving, 1000);
   }
 };
@@ -432,6 +509,7 @@ const startObserving = () => {
  * Initializes the extension functionalities upon page load.
  */
 window.addEventListener('load', () => {
+  console.log('content.js: Page loaded. Initializing extension.');
   startObserving();             // Start monitoring new messages
   updateIndicator();            // Display or update the usage indicator
   checkAndShowSplashScreen();   // Show splash screen if not shown before
@@ -443,6 +521,7 @@ window.addEventListener('load', () => {
 
 // Periodically update the usage indicator every 1 minute
 setInterval(() => {
+  console.log('setInterval: Updating usage display.');
   updateIndicator();
 }, 60 * 1000); // 60,000 milliseconds
 
@@ -450,9 +529,10 @@ setInterval(() => {
  * Listens for changes in chrome.storage and updates the usage indicator in real-time.
  */
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.usageData) {
+  if (area === 'local' && (changes.usageData || changes.lastUsedModel)) {
+    console.log('chrome.storage.onChanged: Detected changes in usageData or lastUsedModel.');
     updateIndicator();
-    if (changes.usageData.newValue) {
+    if (changes.usageData && changes.usageData.newValue) {
       for (let model in changes.usageData.newValue) {
         const count = changes.usageData.newValue[model].count;
         checkLimit(model, count);
