@@ -41,6 +41,10 @@
   cursor: pointer; /* Changed from default to pointer */
 }
 
+#chatgpt-usage-indicator > div.header > div.header-top > h3 {
+  font-size: 1.25em !important;
+}
+
 /* Header-Bottom: Collapsed Usage Text */
 #chatgpt-usage-indicator .header-bottom {
   padding: 0 15px 10px 15px; /* Padding for spacing */
